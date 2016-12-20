@@ -9,7 +9,9 @@ import os
 
 class LaneFinder(object):
   def __init__(self, image):
-    self.image = image
+    self.image  = image
+    self.width  = image.shape[1]
+    self.height = image.shape[0]
 
   def grayscale(self):
     return cv2.cvtColor(self.image, cv2.COLOR_RGB2GRAY)
@@ -48,12 +50,11 @@ class LaneFinder(object):
     return ignore_mask_color
 
   def generate_vertices(self):
-    image_shape = self.image.shape
     vertices = np.array([[
-      (0,image_shape[0]),
-      ((image_shape[1]/2), ((image_shape[0]/2)+10)),
-      ((image_shape[1]/2), ((image_shape[0]/2)+10)),
-      (image_shape[1],image_shape[0])
+      (0,self.height),
+      ((self.width/2), ((self.height/2)+10)),
+      ((self.width/2), ((self.height/2)+10)),
+      (self.width,self.height)
     ]], dtype=np.int32)
     return vertices
 
@@ -111,7 +112,7 @@ image = mpimg.imread('CarND-LaneLines-P1/test_images/solidWhiteRight.jpg')
 print('This image is:', type(image), 'with dimesions:', image.shape)
 
 finder = LaneFinder(image)
-image_after_grayscale = finder.grayscale()
+# image_after_grayscale = finder.grayscale()
 region_of_interest    = finder.region_of_interest()
 
 plt.imshow(region_of_interest)  #call as  to show a grayscaled image
