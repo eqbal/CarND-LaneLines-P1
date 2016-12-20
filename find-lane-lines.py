@@ -22,22 +22,15 @@ class LaneFinder(object):
     """Applies a Gaussian Noise kernel"""
     return cv2.GaussianBlur(self.image, (kernel_size, kernel_size), 0)
 
-  def region_of_interest(self, vertices):
-    """
-    Applies an image mask.
-
-    Only keeps the region of the image defined by the polygon
-    formed from `vertices`. The rest of the image is set to black.
-    """
+  def region_of_interest(self):
     #defining a blank mask to start with
     mask = np.zeros_like(self.image)
 
     #defining a 3 channel or 1 channel color to fill the mask with depending on the input image
-    if len(self.image.shape) > 2:
-      channel_count = self.image.shape[2]  # i.e. 3 or 4 depending on your image
-        ignore_mask_color = (255,) * channel_count
-    else:
-      ignore_mask_color = 255
+    ignore_mask_color = self.get_ignore_mask_color()
+
+    #define vertices for the needed region (left and right lane)
+    vertices = self.generate_vertices()
 
     #filling pixels inside the polygon defined by "vertices" with the fill color
     cv2.fillPoly(mask, vertices, ignore_mask_color)
@@ -46,6 +39,23 @@ class LaneFinder(object):
     masked_image = cv2.bitwise_and(self.image, mask)
     return masked_image
 
+  def get_ignore_mask_color(self):
+    if len(self.image.shape) > 2:
+      channel_count = self.image.shape[2]  # i.e. 3 or 4 depending on your image
+      ignore_mask_color = (255,) * channel_count
+    else:
+      ignore_mask_color = 255
+    return ignore_mask_color
+
+  def generate_vertices(self):
+    image_shape = self.image.shape
+    vertices = np.array([[
+      (0,image_shape[0]),
+      ((image_shape[1]/2), ((image_shape[0]/2)+10)),
+      ((image_shape[1]/2), ((image_shape[0]/2)+10)),
+      (image_shape[1],image_shape[0])
+    ]], dtype=np.int32)
+    return vertices
 
   def draw_lines(self, lines, color=[255, 0, 0], thickness=2):
     """
@@ -90,21 +100,22 @@ class LaneFinder(object):
 
     The result image is computed as follows:
 
-    initial_img * α + img * β + λ
+    initial_img * a + img * b + g
     NOTE: initial_img and img must be the same shape!
     """
     return cv2.addWeighted(initial_img, a, self.image, b, g)
 
 #reading in an image
-image = mpimg.imread('test_images/solidWhiteRight.jpg')
+image = mpimg.imread('CarND-LaneLines-P1/test_images/solidWhiteRight.jpg')
 #printing out some stats and plotting
 print('This image is:', type(image), 'with dimesions:', image.shape)
 
 finder = LaneFinder(image)
 image_after_grayscale = finder.grayscale()
+region_of_interest    = finder.region_of_interest()
 
-# plt.imshow(image)  #call as  to show a grayscaled image
-plt.imshow(image_after_grayscale, cmap='gray')
+plt.imshow(region_of_interest)  #call as  to show a grayscaled image
+# plt.imshow(image_after_grayscale, cmap='gray')
 plt.show()
 
 
