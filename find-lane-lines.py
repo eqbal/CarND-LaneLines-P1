@@ -8,21 +8,32 @@ import os
 
 
 class LaneFinder(object):
+
   def __init__(self, image):
-    self.image  = image
-    self.width  = image.shape[1]
-    self.height = image.shape[0]
+    self.original = image
+    self.image    = image
+    self.width    = image.shape[1]
+    self.height   = image.shape[0]
+
+  CANNY_LOW_THRESHOLD = 80
+  CANNY_HIGH_THRESHOLd = 200
+  RHO = 2
+  THETA = np.pi / 180
+  THRESHOLD = 20
+  MIN_LINE_LENGTH = 20
+  MAX_LINE_GAP = 10
+  GAUSSIAN_KERNEL = 5
 
   def grayscale(self):
-    return cv2.cvtColor(self.image, cv2.COLOR_RGB2GRAY)
+    self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2GRAY)
 
   def canny(self, low_threshold, high_threshold):
     """Applies the Canny transform"""
-    return cv2.Canny(self.image, low_threshold, high_threshold)
+    self.image = cv2.Canny(self.image, low_threshold, high_threshold)
 
   def gaussian_blur(self, kernel_size):
     """Applies a Gaussian Noise kernel"""
-    return cv2.GaussianBlur(self.image, (kernel_size, kernel_size), 0)
+    self.image = cv2.GaussianBlur(self.image, (kernel_size, kernel_size), 0)
 
   def region_of_interest(self):
     #defining a blank mask to start with
@@ -38,8 +49,7 @@ class LaneFinder(object):
     cv2.fillPoly(mask, vertices, ignore_mask_color)
 
     #returning the image only where mask pixels are nonzero
-    masked_image = cv2.bitwise_and(self.image, mask)
-    return masked_image
+    self.image = cv2.bitwise_and(self.image, mask)
 
   def get_ignore_mask_color(self):
     if len(self.image.shape) > 2:
@@ -104,7 +114,7 @@ class LaneFinder(object):
     initial_img * a + img * b + g
     NOTE: initial_img and img must be the same shape!
     """
-    return cv2.addWeighted(initial_img, a, self.image, b, g)
+    self.image = cv2.addWeighted(initial_img, a, self.image, b, g)
 
 #reading in an image
 image = mpimg.imread('CarND-LaneLines-P1/test_images/solidWhiteRight.jpg')
@@ -112,10 +122,10 @@ image = mpimg.imread('CarND-LaneLines-P1/test_images/solidWhiteRight.jpg')
 print('This image is:', type(image), 'with dimesions:', image.shape)
 
 finder = LaneFinder(image)
-# image_after_grayscale = finder.grayscale()
-region_of_interest    = finder.region_of_interest()
+finder.grayscale()
+finder.region_of_interest()
 
-plt.imshow(region_of_interest)  #call as  to show a grayscaled image
+plt.imshow(finder.image)  #call as  to show a grayscaled image
 # plt.imshow(image_after_grayscale, cmap='gray')
 plt.show()
 
