@@ -70,8 +70,8 @@ class LaneFinder(object):
   def generate_vertices(self):
     vertices = np.array([[
       (0,self.height),
-      ((self.width*3/8), (self.height*5/8)),
-      ((self.width*5/8), (self.height*5/8)),
+      ((self.width/2), ((self.height/2)+45)),
+      ((self.width/2), ((self.height/2)+45)),
       (self.width,self.height)
     ]], dtype=np.int32)
 
