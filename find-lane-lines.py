@@ -108,7 +108,7 @@ class LaneFinder(object):
             y2 = self.height
           lines2.append([[x1, y1, x2, y2]])
 
-      self.draw_lines(line_img, lines2, thickness=10)
+      self.draw_lines(line_img, lines2, thickness=2)
 
     self.image = line_img
 
@@ -129,9 +129,20 @@ image = load_image('solidWhiteRight.jpg')
 print('This image is:', type(image), 'with dimesions:', image.shape)
 
 
-for image in os.listdir("test_images/"):
-    finder = LaneFinder(load_image(image))
+# for image in os.listdir("test_images/"):
+    # finder = LaneFinder(load_image(image))
+    # finder.call()
+    # finder.show()
+
+from moviepy.editor import VideoFileClip
+from IPython.display import HTML
+
+def process_image(image):
+    finder = LaneFinder(image)
     finder.call()
-    finder.show()
+    return finder.image
 
-
+white_output = 'white.mp4'
+clip1 = VideoFileClip("solidWhiteRight.mp4")
+white_clip = clip1.fl_image(process_image)
+white_clip.write_videofile(white_output, audio=False)
