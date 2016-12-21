@@ -68,51 +68,27 @@ class LaneFinder(object):
     return vertices
 
   def draw_lines(self, lines, color=[255, 0, 0], thickness=2):
-    """
-    NOTE: this is the function you might want to use as a starting point once you want to
-    average/extrapolate the line segments you detect to map out the full
-    extent of the lane (going from the result shown in raw-lines-example.mp4
-    to that shown in P1_example.mp4).
-
-    Think about things like separating line segments by their
-    slope ((y2-y1)/(x2-x1)) to decide which segments are part of the left
-    line vs. the right line.  Then, you can average the position of each of
-    the lines and extrapolate to the top and bottom of the lane.
-
-    This function draws `lines` with `color` and `thickness`.
-    Lines are drawn on the image inplace (mutates the image).
-    If you want to make the lines semi-transparent, think about combining
-    this function with the weighted_img() function below
-    """
     for line in lines:
       for x1,y1,x2,y2 in line:
         cv2.line(self.image, (x1, y1), (x2, y2), color, thickness)
 
-  def hough_lines(self, rho, theta, threshold, min_line_len, max_line_gap):
-    """
-    `img` should be the output of a Canny transform.
+  def hough_lines(self):
+    self.lines = cv2.HoughLinesP(
+        self.image,
+        self.RHO,
+        self.THETA,
+        self.THRESHOLD,
+        np.array([]),
+        minLineLength=self.MIN_LINE_LENGTH,
+        maxLineGap=self.MAX_LINE_GAP
+    )
 
-    Returns an image with hough lines drawn.
-    """
-    lines = cv2.HoughLinesP(self.image, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
-    line_img = np.zeros((self.image.shape[0], self.image.shape[1], 3), dtype=np.uint8)
-    draw_lines(line_img, lines)
-    return line_img
-
-  # Python 3 has support for cool math symbols.
+  def draw_hough_lines(self):
+    line_img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+    self.draw_lines(line_img, self.lines)
+    self.image = line_img
 
   def weighted_img(self, initial_img, a=0.8, b=1., g=0.):
-    """
-    `img` is the output of the hough_lines(), An image with lines drawn on it.
-    Should be a blank image (all black) with lines drawn on it.
-
-    `initial_img` should be the image before any processing.
-
-    The result image is computed as follows:
-
-    initial_img * a + img * b + g
-    NOTE: initial_img and img must be the same shape!
-    """
     self.image = cv2.addWeighted(initial_img, a, self.image, b, g)
 
 #reading in an image
@@ -138,6 +114,12 @@ finder.remove_noise()
 plt.subplot(234)
 plt.imshow(finder.image, cmap='gray')
 
+finder.region_of_interest()
+plt.subplot(235)
+plt.imshow(finder.image, cmap='gray')
+
+finder.hough_lines()
+print finder.lines
 plt.show()
 
 
