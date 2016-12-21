@@ -9,12 +9,6 @@ import os
 
 class LaneFinder(object):
 
-  def __init__(self, image):
-    self.original = image
-    self.image    = image
-    self.width    = image.shape[1]
-    self.height   = image.shape[0]
-
   CANNY_LOW_THRESHOLD = 64
   CANNY_HIGH_THRESHOLd = 192
   RHO = 1
@@ -24,6 +18,20 @@ class LaneFinder(object):
   MAX_LINE_GAP = 200
   GAUSSIAN_KERNEL = 5
 
+  def __init__(self, image):
+    self.original = image
+    self.image    = image
+    self.width    = image.shape[1]
+    self.height   = image.shape[0]
+
+  def call(self):
+    self.grayscale()
+    self.gaussian_blur()
+    self.canny()
+    self.remove_noise()
+    self.region_of_interest()
+    self.hough_lines()
+    self.weighted_img()
 
   def grayscale(self):
     self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2GRAY)
@@ -114,29 +122,7 @@ image = mpimg.imread('CarND-LaneLines-P1/test_images/solidWhiteRight.jpg')
 print('This image is:', type(image), 'with dimesions:', image.shape)
 
 finder = LaneFinder(image)
-
-finder.grayscale()
-# plt.subplot(231)
-# plt.imshow(finder.image, cmap='gray')
-
-finder.gaussian_blur()
-# plt.subplot(232)
-# plt.imshow(finder.image, cmap='gray')
-
-finder.canny()
-# plt.subplot(233)
-# plt.imshow(finder.image, cmap='gray')
-
-finder.remove_noise()
-# plt.subplot(234)
-# plt.imshow(finder.image, cmap='gray')
-
-finder.region_of_interest()
-# plt.subplot(235)
-# plt.imshow(finder.image, cmap='gray')
-
-finder.hough_lines()
-finder.weighted_img()
+finder.call()
 
 plt.imshow(finder.image)
 
