@@ -13,9 +13,9 @@ class LaneFinder(object):
   CANNY_HIGH_THRESHOLd = 192
   RHO = 1
   THETA = np.pi / 180
-  THRESHOLD = 32
-  MIN_LINE_LENGTH = 1
-  MAX_LINE_GAP = 200
+  THRESHOLD = 40
+  MIN_LINE_LENGTH = 30
+  MAX_LINE_GAP = 20
   GAUSSIAN_KERNEL = 5
 
   def __init__(self, image):
@@ -69,15 +69,15 @@ class LaneFinder(object):
 
   def generate_vertices(self):
     vertices = np.array([[
-      (0,self.height),
-      ((self.width/2), ((self.height/2)+45)),
-      ((self.width/2), ((self.height/2)+45)),
-      (self.width,self.height)
+        (100, self.height),
+        (400, 330),
+        (550, 330),
+        (900, self.height)
     ]], dtype=np.int32)
 
     return vertices
 
-  def draw_lines(self, img, lines, color=[255, 0, 0], thickness=2):
+  def draw_lines(self, img, lines, color=[255, 0, 0], thickness=5):
     for line in lines:
       for x1,y1,x2,y2 in line:
         cv2.line(img, (x1, y1), (x2, y2), color, thickness)
@@ -108,7 +108,7 @@ class LaneFinder(object):
             y2 = self.height
           lines2.append([[x1, y1, x2, y2]])
 
-      self.draw_lines(line_img, lines2, thickness=2)
+      self.draw_lines(line_img, lines2)
 
     self.image = line_img
 
@@ -122,17 +122,17 @@ class LaneFinder(object):
 
 
 
+# image = load_image('solidWhiteRight.jpg')
+# print('This image is:', type(image), 'with dimesions:', image.shape)
+
+
 def load_image(filename):
-    return mpimg.imread('test_images/%s' % filename)
-
-image = load_image('solidWhiteRight.jpg')
-print('This image is:', type(image), 'with dimesions:', image.shape)
-
+  return mpimg.imread('test_images/%s' % filename)
 
 # for image in os.listdir("test_images/"):
-    # finder = LaneFinder(load_image(image))
-    # finder.call()
-    # finder.show()
+  # finder = LaneFinder(load_image(image))
+  # finder.call()
+  # finder.show()
 
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
