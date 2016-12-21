@@ -27,33 +27,32 @@ class LaneFinder(object):
   def grayscale(self):
     self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2GRAY)
 
-  def canny(self, low_threshold, high_threshold):
+  def canny(self):
     """Applies the Canny transform"""
-    self.image = cv2.Canny(self.image, low_threshold, high_threshold)
+    self.image = cv2.Canny(self.image, self.CANNY_LOW_THRESHOLD, self.CANNY_HIGH_THRESHOLd)
 
-  def gaussian_blur(self, kernel_size):
+  def remove_noise(self):
+    self.image = cv2.dilate(self.image, cv2.getStructuringElement(cv2.MORPH_DILATE, (5, 5)))
+
+  def gaussian_blur(self):
     """Applies a Gaussian Noise kernel"""
-    self.image = cv2.GaussianBlur(self.image, (kernel_size, kernel_size), 0)
+    self.image = cv2.GaussianBlur(self.image, (self.GAUSSIAN_KERNEL, self.GAUSSIAN_KERNEL), 0)
 
   def region_of_interest(self):
     #defining a blank mask to start with
     mask = np.zeros_like(self.image)
-
     #defining a 3 channel or 1 channel color to fill the mask with depending on the input image
     ignore_mask_color = self.get_ignore_mask_color()
-
     #define vertices for the needed region (left and right lane)
     vertices = self.generate_vertices()
-
     #filling pixels inside the polygon defined by "vertices" with the fill color
     cv2.fillPoly(mask, vertices, ignore_mask_color)
-
     #returning the image only where mask pixels are nonzero
     self.image = cv2.bitwise_and(self.image, mask)
 
   def get_ignore_mask_color(self):
     if len(self.image.shape) > 2:
-      channel_count = self.image.shape[2]  # i.e. 3 or 4 depending on your image
+      channel_count = self.image.shape[2]
       ignore_mask_color = (255,) * channel_count
     else:
       ignore_mask_color = 255
@@ -62,8 +61,8 @@ class LaneFinder(object):
   def generate_vertices(self):
     vertices = np.array([[
       (0,self.height),
-      ((self.width/2), ((self.height/2)+10)),
-      ((self.width/2), ((self.height/2)+10)),
+      ((self.width/2), ((self.height/2)+30)),
+      ((self.width/2), ((self.height/2)+30)),
       (self.width,self.height)
     ]], dtype=np.int32)
     return vertices
@@ -122,11 +121,23 @@ image = mpimg.imread('CarND-LaneLines-P1/test_images/solidWhiteRight.jpg')
 print('This image is:', type(image), 'with dimesions:', image.shape)
 
 finder = LaneFinder(image)
-finder.grayscale()
-finder.region_of_interest()
 
-plt.imshow(finder.image)  #call as  to show a grayscaled image
-# plt.imshow(image_after_grayscale, cmap='gray')
+finder.grayscale()
+plt.subplot(231)
+plt.imshow(finder.image, cmap='gray')
+
+finder.gaussian_blur()
+plt.subplot(232)
+plt.imshow(finder.image, cmap='gray')
+
+finder.canny()
+plt.subplot(233)
+plt.imshow(finder.image, cmap='gray')
+
+finder.remove_noise()
+plt.subplot(234)
+plt.imshow(finder.image, cmap='gray')
+
 plt.show()
 
 
