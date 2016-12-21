@@ -15,13 +15,13 @@ class LaneFinder(object):
     self.width    = image.shape[1]
     self.height   = image.shape[0]
 
-  CANNY_LOW_THRESHOLD = 80
-  CANNY_HIGH_THRESHOLd = 200
-  RHO = 2
+  CANNY_LOW_THRESHOLD = 64
+  CANNY_HIGH_THRESHOLd = 192
+  RHO = 1
   THETA = np.pi / 180
-  THRESHOLD = 20
-  MIN_LINE_LENGTH = 20
-  MAX_LINE_GAP = 10
+  THRESHOLD = 32
+  MIN_LINE_LENGTH = 1
+  MAX_LINE_GAP = 200
   GAUSSIAN_KERNEL = 5
 
   def grayscale(self):
@@ -61,10 +61,11 @@ class LaneFinder(object):
   def generate_vertices(self):
     vertices = np.array([[
       (0,self.height),
-      ((self.width/2), ((self.height/2)+30)),
-      ((self.width/2), ((self.height/2)+30)),
+      ((self.width*3/8), (self.height*5/8)),
+      ((self.width*5/8), (self.height*5/8)),
       (self.width,self.height)
     ]], dtype=np.int32)
+
     return vertices
 
   def draw_lines(self, img, lines, color=[255, 0, 0], thickness=2):
@@ -98,7 +99,7 @@ class LaneFinder(object):
             y2 = self.height
           lines2.append([[x1, y1, x2, y2]])
 
-      self.draw_lines(line_img, lines2, thickness=10)
+      self.draw_lines(line_img, lines2, thickness=5)
 
     self.image = line_img
 
@@ -114,24 +115,24 @@ print('This image is:', type(image), 'with dimesions:', image.shape)
 finder = LaneFinder(image)
 
 finder.grayscale()
-plt.subplot(231)
-plt.imshow(finder.image, cmap='gray')
+# plt.subplot(231)
+# plt.imshow(finder.image, cmap='gray')
 
 finder.gaussian_blur()
-plt.subplot(232)
-plt.imshow(finder.image, cmap='gray')
+# plt.subplot(232)
+# plt.imshow(finder.image, cmap='gray')
 
 finder.canny()
-plt.subplot(233)
-plt.imshow(finder.image, cmap='gray')
+# plt.subplot(233)
+# plt.imshow(finder.image, cmap='gray')
 
 finder.remove_noise()
-plt.subplot(234)
-plt.imshow(finder.image, cmap='gray')
+# plt.subplot(234)
+# plt.imshow(finder.image, cmap='gray')
 
 finder.region_of_interest()
-plt.subplot(235)
-plt.imshow(finder.image, cmap='gray')
+# plt.subplot(235)
+# plt.imshow(finder.image, cmap='gray')
 
 finder.hough_lines()
 plt.imshow(finder.image)
