@@ -67,10 +67,10 @@ class LaneFinder(object):
     ]], dtype=np.int32)
     return vertices
 
-  def draw_lines(self, lines, color=[255, 0, 0], thickness=2):
+  def draw_lines(self, img, lines, color=[255, 0, 0], thickness=2):
     for line in lines:
       for x1,y1,x2,y2 in line:
-        cv2.line(self.image, (x1, y1), (x2, y2), color, thickness)
+        cv2.line(img, (x1, y1), (x2, y2), color, thickness)
 
   def hough_lines(self):
     self.lines = cv2.HoughLinesP(
@@ -83,10 +83,25 @@ class LaneFinder(object):
         maxLineGap=self.MAX_LINE_GAP
     )
 
-  def draw_hough_lines(self):
     line_img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-    self.draw_lines(line_img, self.lines)
+
+    if self.lines != None:
+      lines2 = []
+      for line in self.lines:
+        for x1,y1,x2,y2 in line:
+          k = float(y2-y1)/(x2-x1)
+          if y1 > y2:
+            x1 = int(x2 + (self.height-y2)/k)
+            y1 = self.height
+          elif y1 < y2:
+            x2 = int(x1 + (self.height-y1)/k)
+            y2 = self.height
+          lines2.append([[x1, y1, x2, y2]])
+
+      self.draw_lines(line_img, lines2, thickness=10)
+
     self.image = line_img
+
 
   def weighted_img(self, initial_img, a=0.8, b=1., g=0.):
     self.image = cv2.addWeighted(initial_img, a, self.image, b, g)
@@ -119,7 +134,8 @@ plt.subplot(235)
 plt.imshow(finder.image, cmap='gray')
 
 finder.hough_lines()
-print finder.lines
+plt.imshow(finder.image)
+
 plt.show()
 
 
