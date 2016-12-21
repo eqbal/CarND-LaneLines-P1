@@ -116,17 +116,22 @@ class LaneFinder(object):
   def weighted_img(self, a=0.8, b=1., g=0.):
     self.image = cv2.addWeighted(self.original, a, self.image, b, g)
 
-#reading in an image
-image = mpimg.imread('CarND-LaneLines-P1/test_images/solidWhiteRight.jpg')
-#printing out some stats and plotting
+  def show(self):
+    plt.imshow(self.image)
+    plt.show()
+
+
+
+def load_image(filename):
+    return mpimg.imread('test_images/%s' % filename)
+
+image = load_image('solidWhiteRight.jpg')
 print('This image is:', type(image), 'with dimesions:', image.shape)
 
-finder = LaneFinder(image)
-finder.call()
 
-plt.imshow(finder.image)
-
-plt.show()
-
+for image in os.listdir("test_images/"):
+    finder = LaneFinder(load_image(image))
+    finder.call()
+    finder.show()
 
 
