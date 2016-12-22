@@ -11,11 +11,11 @@ class LaneFinder(object):
 
   CANNY_LOW_THRESHOLD = 64
   CANNY_HIGH_THRESHOLd = 192
-  RHO = 1
+  RHO = 2
   THETA = np.pi / 180
   THRESHOLD = 32
-  MIN_LINE_LENGTH = 1
-  MAX_LINE_GAP = 200
+  MIN_LINE_LENGTH = 20
+  MAX_LINE_GAP = 10
   GAUSSIAN_KERNEL = 5
 
   def __init__(self, image):
@@ -76,7 +76,7 @@ class LaneFinder(object):
     ]], dtype=np.int32)
     return vertices
 
-  def draw_lines(self, img, lines, color=[255, 0, 0], thickness=20):
+  def draw_lines(self, img, lines, color=[255, 0, 0], thickness=10):
     for line in lines:
       for x1,y1,x2,y2 in line:
         cv2.line(img, (x1, y1), (x2, y2), color, thickness)
@@ -145,25 +145,25 @@ for image in os.listdir("test_images/"):
   finder.call()
   finder.show()
 
-from moviepy.editor import VideoFileClip
-from IPython.display import HTML
+# from moviepy.editor import VideoFileClip
+# from IPython.display import HTML
 
-def process_image(image):
-    finder = LaneFinder(image)
-    finder.call()
-    return finder.image
+# def process_image(image):
+    # finder = LaneFinder(image)
+    # finder.call()
+    # return finder.image
 
-white_output = 'white.mp4'
-clip1 = VideoFileClip("solidWhiteRight.mp4")
-white_clip = clip1.fl_image(process_image)
-white_clip.write_videofile(white_output, audio=False)
+# white_output = 'white.mp4'
+# clip1 = VideoFileClip("solidWhiteRight.mp4")
+# white_clip = clip1.fl_image(process_image)
+# white_clip.write_videofile(white_output, audio=False)
 
-yellow_output = 'yellow.mp4'
-clip2 = VideoFileClip('solidYellowLeft.mp4')
-yellow_clip = clip2.fl_image(process_image)
-yellow_clip.write_videofile(yellow_output, audio=False)
+# yellow_output = 'yellow.mp4'
+# clip2 = VideoFileClip('solidYellowLeft.mp4')
+# yellow_clip = clip2.fl_image(process_image)
+# yellow_clip.write_videofile(yellow_output, audio=False)
 
-challenge_output = 'extra.mp4'
-clip2 = VideoFileClip('challenge.mp4')
-challenge_clip = clip2.fl_image(process_image)
-challenge_clip.write_videofile(challenge_output, audio=False)
+# challenge_output = 'extra.mp4'
+# clip2 = VideoFileClip('challenge.mp4')
+# challenge_clip = clip2.fl_image(process_image)
+# challenge_clip.write_videofile(challenge_output, audio=False)
