@@ -77,7 +77,7 @@ class LaneFinder(object):
 
     return vertices
 
-  def draw_lines(self, img, lines, color=[255, 0, 0], thickness=5):
+  def draw_lines(self, img, lines, color=[255, 0, 0], thickness=20):
     for line in lines:
       for x1,y1,x2,y2 in line:
         cv2.line(img, (x1, y1), (x2, y2), color, thickness)
@@ -95,20 +95,32 @@ class LaneFinder(object):
 
     line_img = np.zeros((self.height, self.width, 3), dtype=np.uint8)
 
-    if self.lines != None:
-      lines2 = []
+    lines2 = []
+
+    try:
       for line in self.lines:
         for x1,y1,x2,y2 in line:
+          if abs(y1-y2) < 10:
+            continue
           k = float(y2-y1)/(x2-x1)
           if y1 > y2:
-            x1 = int(x2 + (self.height-y2)/k)
-            y1 = self.height
+            extend = int(x2 + (self.height-y2)/k)
+            lines2.append([x2-x1, y2, k, extend])
           elif y1 < y2:
-            x2 = int(x1 + (self.height-y1)/k)
-            y2 = self.height
-          lines2.append([[x1, y1, x2, y2]])
+            extend = int(x1 + (self.height-y1)/k)
+            lines2.append([x2-x1, y1, k, extend])
 
-      self.draw_lines(line_img, lines2)
+        lines2 = np.array(lines2)
+        lines3 = []
+        for side in [lines2[lines2[:,2]<0], lines2[lines2[:,2]>0]]:
+          h2 = side[:, 1].min()
+          side[:,0] /= side[:,0].min()
+          k1 = np.average(side[:,2], weights=side[:,0])
+          x1 = np.average(side[:,3], weights=side[:,0])
+          lines3.append([int(x1), self.height, int(x1-(self.height-h2)/k1), int(h2)])
+        self.draw_lines(line_img, [lines3])
+    except:
+      pass
 
     self.image = line_img
 
@@ -129,10 +141,10 @@ class LaneFinder(object):
 def load_image(filename):
   return mpimg.imread('test_images/%s' % filename)
 
-# for image in os.listdir("test_images/"):
-  # finder = LaneFinder(load_image(image))
-  # finder.call()
-  # finder.show()
+for image in os.listdir("test_images/"):
+  finder = LaneFinder(load_image(image))
+  finder.call()
+  finder.show()
 
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
@@ -142,15 +154,15 @@ def process_image(image):
     finder.call()
     return finder.image
 
-# white_output = 'white.mp4'
-# clip1 = VideoFileClip("solidWhiteRight.mp4")
-# white_clip = clip1.fl_image(process_image)
-# white_clip.write_videofile(white_output, audio=False)
+white_output = 'white.mp4'
+clip1 = VideoFileClip("solidWhiteRight.mp4")
+white_clip = clip1.fl_image(process_image)
+white_clip.write_videofile(white_output, audio=False)
 
-# yellow_output = 'yellow.mp4'
-# clip2 = VideoFileClip('solidYellowLeft.mp4')
-# yellow_clip = clip2.fl_image(process_image)
-# yellow_clip.write_videofile(yellow_output, audio=False)
+yellow_output = 'yellow.mp4'
+clip2 = VideoFileClip('solidYellowLeft.mp4')
+yellow_clip = clip2.fl_image(process_image)
+yellow_clip.write_videofile(yellow_output, audio=False)
 
 challenge_output = 'extra.mp4'
 clip2 = VideoFileClip('challenge.mp4')
