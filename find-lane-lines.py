@@ -69,12 +69,11 @@ class LaneFinder(object):
 
   def generate_vertices(self):
     vertices = np.array([[
-        (100, self.height),
-        (400, 330),
-        (550, 330),
-        (900, self.height)
+        (0, self.height),
+        (self.width*3/8, self.height*5/8),
+        (self.width*5/8, self.height*5/8),
+        (self.width, self.height)
     ]], dtype=np.int32)
-
     return vertices
 
   def draw_lines(self, img, lines, color=[255, 0, 0], thickness=20):
@@ -146,25 +145,25 @@ for image in os.listdir("test_images/"):
   finder.call()
   finder.show()
 
-from moviepy.editor import VideoFileClip
-from IPython.display import HTML
+# from moviepy.editor import VideoFileClip
+# from IPython.display import HTML
 
-def process_image(image):
-    finder = LaneFinder(image)
-    finder.call()
-    return finder.image
+# def process_image(image):
+    # finder = LaneFinder(image)
+    # finder.call()
+    # return finder.image
 
-white_output = 'white.mp4'
-clip1 = VideoFileClip("solidWhiteRight.mp4")
-white_clip = clip1.fl_image(process_image)
-white_clip.write_videofile(white_output, audio=False)
+# white_output = 'white.mp4'
+# clip1 = VideoFileClip("solidWhiteRight.mp4")
+# white_clip = clip1.fl_image(process_image)
+# white_clip.write_videofile(white_output, audio=False)
 
-yellow_output = 'yellow.mp4'
-clip2 = VideoFileClip('solidYellowLeft.mp4')
-yellow_clip = clip2.fl_image(process_image)
-yellow_clip.write_videofile(yellow_output, audio=False)
+# yellow_output = 'yellow.mp4'
+# clip2 = VideoFileClip('solidYellowLeft.mp4')
+# yellow_clip = clip2.fl_image(process_image)
+# yellow_clip.write_videofile(yellow_output, audio=False)
 
-challenge_output = 'extra.mp4'
-clip2 = VideoFileClip('challenge.mp4')
-challenge_clip = clip2.fl_image(process_image)
-challenge_clip.write_videofile(challenge_output, audio=False)
+# challenge_output = 'extra.mp4'
+# clip2 = VideoFileClip('challenge.mp4')
+# challenge_clip = clip2.fl_image(process_image)
+# challenge_clip.write_videofile(challenge_output, audio=False)
